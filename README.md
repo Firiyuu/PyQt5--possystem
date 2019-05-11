@@ -1,6 +1,6 @@
 # POS System
 
-POS System for undergraduate thesis.
+
 
 ## Installation
 
