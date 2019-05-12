@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets,QtCore
 import sys
 import os
 import sip
-from db_connection import search_request, fetch_items, add_request, update_budget, fetch_budget, delete_request, search_request_delete, reduce_quantity_scan, reduce_quantity_item, increase_quantity_item, search_request_delete_item
+from db_connection import clear_scan, search_request, fetch_items, add_request, update_budget, fetch_budget, delete_request, search_request_delete, reduce_quantity_scan, reduce_quantity_item, increase_quantity_item, search_request_delete_item
 
 
 
@@ -62,6 +62,8 @@ class window(QtWidgets.QMainWindow):
         self.welcome.setFont(f)
 
 
+
+
         self.le = QtWidgets.QLineEdit()
         g = self.le.font()
         g.setPointSize(24) # sets the size to 27
@@ -71,6 +73,13 @@ class window(QtWidgets.QMainWindow):
         self.budget.setSizePolicy(
         QtWidgets.QSizePolicy.Preferred,
         QtWidgets.QSizePolicy.Expanding)
+
+
+        self.done = QtWidgets.QPushButton('Done Shopping')
+        self.done.setSizePolicy(
+        QtWidgets.QSizePolicy.Preferred,
+        QtWidgets.QSizePolicy.Expanding)
+
 
         self.budget_status = QtWidgets.QLabel(centwid)
         self.budget_status.setText("Budget: " + str(curr_budget))
@@ -134,9 +143,11 @@ class window(QtWidgets.QMainWindow):
         self.v_box1.addWidget(self.message2)
         self.v_box1.addWidget(self.mylineEdit)
         self.v_box1.addWidget(self.message3)    
+        self.v_box1.addWidget(self.done)
+        self.v_box1.addStretch()
+        self.v_box1.addStretch()
 
-        self.v_box1.addStretch()
-        self.v_box1.addStretch()
+
 
         lay=QtWidgets.QHBoxLayout()
 
@@ -145,11 +156,15 @@ class window(QtWidgets.QMainWindow):
         
         lay.addLayout(self.v_box1)
         lay.addLayout(self.v_box)
+ 
+
 
         centwid.setLayout(lay)
         self.budget.clicked.connect(self.btn_click)
+        self.done.clicked.connect(self.btn_click3)
         
         self.setCentralWidget(centwid)
+
         self.show()
 
     def btn_click(self):
@@ -185,7 +200,10 @@ class window(QtWidgets.QMainWindow):
            increase_quantity_item(item)
         self.restart_program()
 
-
+    def btn_click3(self):
+         QtWidgets.QMessageBox.about(self, "","Thankyou for shopping!")
+         clear_scan()
+         self.restart_program()
         #set the sample name variable
     def set_sample_name(self):
         self.sample_name = self.mylineEdit.text()

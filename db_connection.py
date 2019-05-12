@@ -70,6 +70,15 @@ def delete_request(item):
     cur.execute(statement, task)
     conn.commit()
 
+def clear_scan():
+    database = "pythonsqlite.db"
+    # create a database connection
+    conn = create_connection(database)
+    cur = conn.cursor()
+    statement = "DELETE FROM scan"
+    cur.execute(statement)
+    conn.commit()  
+
 
 def clear_request():
     database = "pythonsqlite.db"
