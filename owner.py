@@ -110,11 +110,20 @@ class window(QtWidgets.QMainWindow):
         self.tableWidget.hide()
 
         self.b3 = QtWidgets.QPushButton('Add Item')
+        self.b3.setSizePolicy(
+        QtWidgets.QSizePolicy.Preferred,
+        QtWidgets.QSizePolicy.Expanding)
+
         self.b3.clicked.connect(self.btn_click1)
+
 
         self.b4 = QtWidgets.QPushButton('Inventory')
         self.b4.clicked.connect(self.btn_click2)
+        self.b4.setSizePolicy(
+        QtWidgets.QSizePolicy.Preferred,
+        QtWidgets.QSizePolicy.Expanding)
 
+        
         self.submititem = QtWidgets.QPushButton('Submit')
         self.submititem.clicked.connect(self.btn_submititem)
         self.submititem.hide()
@@ -219,7 +228,7 @@ class window(QtWidgets.QMainWindow):
         self.price =self.mylineEdit3.text()
         self.quantity =self.mylineEdit4.text()
         self.name =self.mylineEdit5.text()
-        request = insert_request(str(self.item), str(self.name), str(self.quantity), self.price)
+        request = insert_request(str(self.item).strip(), str(self.name), str(self.quantity), self.price)
         if request is True:
             self.insert_item.setText("Successfully Added Item")
         else:
@@ -233,7 +242,7 @@ class window(QtWidgets.QMainWindow):
         item, value = search_request(self.sample_name)
         print(str(item) + '-' + str(value))
         add_request(str(item), str(value))
-        self.restart_program()
+        self.update()
         self.startNew=1
 
 

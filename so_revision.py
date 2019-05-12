@@ -1,8 +1,8 @@
 from PyQt5 import QtWidgets,QtCore
 import sys
 import os
-
-from db_connection import search_request, fetch_items, add_request, update_budget, fetch_budget, delete_request
+import sip
+from db_connection import search_request, fetch_items, add_request, update_budget, fetch_budget, delete_request, search_request_delete, reduce_quantity_scan, reduce_quantity_item, increase_quantity_item, search_request_delete_item
 
 
 
@@ -12,11 +12,19 @@ class window(QtWidgets.QMainWindow):
         centwid=QtWidgets.QWidget()
 
         self.mylineEdit = QtWidgets.QLineEdit()
+
+        f = self.mylineEdit.font()
+        f.setPointSize(24) # sets the size to 27
+        self.mylineEdit.setFont(f)
+
+
         self.mylineEdit2 = QtWidgets.QLineEdit()
+
+
         self.startNew=1
         #initialise to empty string on start up
         self.mylineEdit.setText(' ')
-
+        self.toggle = False
 
         #barcode scans here and then a returnPressed is registered
 
@@ -30,6 +38,11 @@ class window(QtWidgets.QMainWindow):
         self.v_box = QtWidgets.QVBoxLayout()
         message = QtWidgets.QLabel(centwid)
         message.setText("Items Scanned")
+        f = message.font()
+        f.setPointSize(7) # sets the size to 27
+        f.setBold(True)
+        message.setFont(f)
+
         self.v_box.addWidget(message)
 
 
@@ -41,37 +54,76 @@ class window(QtWidgets.QMainWindow):
         curr_budget = fetch_budget()
         curr_budget = curr_budget[0]
 
+        self.welcome = QtWidgets.QLabel(centwid)
+        self.welcome.setText("ENJOY YOUR SHOPPING!")
+        f = self.welcome.font()
+        f.setPointSize(24) # sets the size to 27
+        f.setBold(True)
+        self.welcome.setFont(f)
 
-        
 
         self.le = QtWidgets.QLineEdit()
+        g = self.le.font()
+        g.setPointSize(24) # sets the size to 27
+        self.le.setFont(g)
+
         self.budget = QtWidgets.QPushButton('Enter Budget')
+        self.budget.setSizePolicy(
+        QtWidgets.QSizePolicy.Preferred,
+        QtWidgets.QSizePolicy.Expanding)
+
         self.budget_status = QtWidgets.QLabel(centwid)
         self.budget_status.setText("Budget: " + str(curr_budget))
+        f = self.budget_status.font()
+        f.setPointSize(10) # sets the size to 27
+        f.setBold(True)
+        self.budget_status.setFont(f)
 
         self.message1 = QtWidgets.QLabel(centwid)
         self.message1.setText("Scan an item: ")
+        f = self.message1.font()
+        f.setPointSize(10) # sets the size to 27
+        f.setBold(True)
+        self.message1.setFont(f)
+
 
         self.message2 = QtWidgets.QLabel(centwid)
         self.message2.setText("Total: " + str(total))
+        f = self.message2.font()
+        f.setPointSize(10) # sets the size to 27
+        f.setBold(True)
+        self.message2.setFont(f)
 
         self.message3 = QtWidgets.QLabel(centwid)
         self.message3.setText(" ")
 
+        self.message4 = QtWidgets.QLabel(centwid)
+        self.message4.setText(" ")
+
+
         self.budget_message = QtWidgets.QLabel(centwid)
 
-        if total > curr_budget:
-            status = "You are over budget!"
+        if total > (curr_budget*70)/100:
+            if total > curr_budget: 
+                status = "You are over budget!"
+                QtWidgets.QMessageBox.about(self, "Warning!!", "You are over budget!")
+            else:
+                status = "You are close to over budgeting!"
+                QtWidgets.QMessageBox.about(self, "Caution!!", "You are close to over budgeting!")
+
         else:
             status = "Still in budget!"
         self.budget_message.setText("Budget Status: " + str(status))
-
+        f = self.budget_message.font()
+        f.setPointSize(10) # sets the size to 27
+        f.setBold(True)
+        self.budget_message.setFont(f)
 
         self.v_box1 =QtWidgets.QVBoxLayout()
 
 
 
-       
+        self.v_box1.addWidget(self.welcome)
         self.v_box1.addWidget(self.le)
         self.v_box1.addWidget(self.budget)
         self.v_box1.addWidget(self.budget_message)
@@ -101,23 +153,36 @@ class window(QtWidgets.QMainWindow):
         self.show()
 
     def btn_click(self):
+      
         sender = self.sender()
+
         if sender.text() == 'Enter Budget' and self.le.text() != '':
-            print(self.le.text())
-            budget = float(self.le.text())
-            update_budget(budget)
-            curr_budget = fetch_budget()
-            curr_budget = curr_budget[0]
-            self.budget_status.setText("Budget: " + str(curr_budget))
-       
- 
+            if self.toggle is True:
+                print(self.le.text())
+                budget = float(self.le.text())
+                update_budget(budget)
+                curr_budget = fetch_budget()
+                curr_budget = curr_budget[0]
+                self.budget_status.setText("Budget: " + str(curr_budget))
+                self.le.hide()
+                self.toggle = False
+            else:
+                self.toggle = True
+                self.le.show()
+        
 
     def btn_click1(self):
         sender = self.sender()
         item = sender.text()
         item = item.split('-')[0]
         item = item.strip()
-        delete_request(item)
+        item, quantity = search_request_delete(item)
+        print(str(quantity))
+        if int(quantity) == 1:
+           delete_request(item)
+        else:
+           reduce_quantity_scan(item)
+           increase_quantity_item(item)
         self.restart_program()
 
 
@@ -128,10 +193,19 @@ class window(QtWidgets.QMainWindow):
         request = search_request(self.sample_name)
         if request is not False:
             item, value = search_request(self.sample_name)
+            if int(value) == 0:
+                value = ''
             print(str(item) + '-' + str(value))
-            add_request(str(item), str(value))
-            self.restart_program()
-            self.startNew=1
+            item_, quantity = search_request_delete_item(item)
+            print(str(quantity))
+            if quantity > 1:
+                add_request(str(item), str(value))
+                reduce_quantity_item(str(item))
+                self.restart_program()
+                self.startNew=1
+            else:
+                self.message3.setText("There's no stock for this item anymore")
+                self.startNew=1              
         else:
             self.message3.setText("Item does not exist")
             self.startNew=1
@@ -141,34 +215,71 @@ class window(QtWidgets.QMainWindow):
             self.mylineEdit.setText(text[-1])
             self.startNew=0
 
+
+    def clearLayout(self, layout):
+        if layout is not None:
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
+                else:
+                    self.clearLayout(item.layout())
+
     def restart_program(self):
-        total, items = fetch_items()
-        for item in items:
-            item = str(item[0]) + ' - ' + str(item[2]) +'x'
-            self.b3 = QtWidgets.QPushButton(item)
-            self.v_box.addWidget(self.b3)
-            self.b3.clicked.connect(self.btn_click1)
-        curr_budget = fetch_budget()
-        curr_budget = curr_budget[0]
-        self.message2.setText("Total: " + str(total))
-        self.budget_status.setText("Budget: " + str(curr_budget))
 
-        self.message3.setText(" ")
+    
+            total, items = fetch_items()
 
+            self.clearLayout(self.v_box)
+                     
 
+            for item in items:
+                value = str(item[2])
+                if int(value) == 0:
+                    value = ''
+                item = str(item[0]) + ' - ' + value  +'x'
+                self.b3 = QtWidgets.QPushButton(item)
+                self.b3.setSizePolicy(
+                QtWidgets.QSizePolicy.Preferred,
+                QtWidgets.QSizePolicy.Expanding)
 
-        if total > curr_budget:
-            status = "You are over budget!"
-        else:
-            status = "Still in budget!"
-        self.budget_message.setText("Budget Status: " + str(status))
-        """Restarts the current program.
-        Note: this function does not return. Any cleanup action (like
-        saving data) must be done before calling this function."""
-##        python = sys.executable
-##        os.execl(python, python, * sys.argv)
+                self.v_box.addWidget(self.b3)
+                self.b3.clicked.connect(self.btn_click1)
 
 
+            curr_budget = fetch_budget()
+            curr_budget = curr_budget[0]
+            self.message2.setText("Total: " + str(total))
+            f = self.message2.font()
+            f.setPointSize(10) # sets the size to 27
+            f.setBold(True)
+            self.message2.setFont(f)
+
+            self.budget_status.setText("Budget: " + str(curr_budget))
+            f = self.budget_status.font()
+            f.setPointSize(10) # sets the size to 27
+            f.setBold(True)
+            self.budget_status.setFont(f)
+
+            self.message3.setText(" ")
+
+
+            if total > (curr_budget*70)/100:
+                if total > curr_budget: 
+                    status = "You are over budget!"
+                    QtWidgets.QMessageBox.about(self, "Warning!!", "You are over budget!")
+                else:
+                    status = "You are close to over budgeting!"
+                    QtWidgets.QMessageBox.about(self, "Caution!!", "You are close to over budgeting!")
+
+            else:
+                status = "Still in budget!"
+
+
+
+
+   
 
 app=QtWidgets.QApplication(sys.argv)
 

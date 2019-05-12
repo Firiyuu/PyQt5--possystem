@@ -205,9 +205,132 @@ def search_request(upc):
 
     return item, value
 
+def search_request_delete_item(upc):
+    #database = "/home/pi/new/db/pythonsqlite.db"
+    database = "pythonsqlite.db"
+ 
+    # create a database connection
+    conn = create_connection(database)
 
 
+    
+    cur = conn.cursor()
+    statement = "SELECT * FROM items WHERE item_name=?"
+    task = (str(upc),)
+    cur.execute(statement, task)
+    row = cur.fetchone()
 
+    if row is None:
+        return False
+    # if row is None:
+    #     amount = raw_input("Enter quantity: ")
+    #     insert_request(upc, amount)
+    #     statement = "SELECT * FROM items WHERE barcode=?"
+    #     task = (str(upc),)
+    #     cur.execute(statement, task)
+    #     row = cur.fetchone()
+    #     item = row[0]
+    #     value = row[2]
+    #     return item, value
+    try:
+       item = row[0]
+       quantity = row[1]
+    except Exception as e:
+        print(str(e))
+
+
+    return item, quantity
+def search_request_delete(upc):
+    #database = "/home/pi/new/db/pythonsqlite.db"
+    database = "pythonsqlite.db"
+ 
+    # create a database connection
+    conn = create_connection(database)
+
+
+    
+    cur = conn.cursor()
+    statement = "SELECT * FROM scan WHERE item=?"
+    task = (str(upc),)
+    cur.execute(statement, task)
+    row = cur.fetchone()
+
+    if row is None:
+        return False
+    # if row is None:
+    #     amount = raw_input("Enter quantity: ")
+    #     insert_request(upc, amount)
+    #     statement = "SELECT * FROM items WHERE barcode=?"
+    #     task = (str(upc),)
+    #     cur.execute(statement, task)
+    #     row = cur.fetchone()
+    #     item = row[0]
+    #     value = row[2]
+    #     return item, value
+    try:
+       item = row[0]
+       quantity = row[2]
+    except Exception as e:
+        print(str(e))
+
+
+    return item, quantity
+
+def reduce_quantity_scan(upc):
+    #UPDATE Products SET Price = Price + 50 WHERE ProductID = 1
+    database = "pythonsqlite.db"
+ 
+    # create a database connection
+    conn = create_connection(database)
+
+
+    
+    cur = conn.cursor()
+    statement = "UPDATE scan SET quantity = quantity-1 WHERE item=?"
+    task = (str(upc),)
+    cur.execute(statement, task)
+    conn.commit()
+    conn.close()
+
+    print('Quantity Update on table "Scan" Success')
+
+
+def reduce_quantity_item(upc):
+    #UPDATE Products SET Price = Price + 50 WHERE ProductID = 1
+    database = "pythonsqlite.db"
+ 
+    # create a database connection
+    conn = create_connection(database)
+
+
+    
+    cur = conn.cursor()
+    statement = "UPDATE items SET quantity = quantity-1 WHERE item_name=?"
+    task = (str(upc),)
+    cur.execute(statement, task)
+    conn.commit()
+    conn.close()
+
+    print('Quantity Update on table "Item" Success')
+
+
+def increase_quantity_item(upc):
+    #UPDATE Products SET Price = Price + 50 WHERE ProductID = 1
+    database = "pythonsqlite.db"
+ 
+    # create a database connection
+    conn = create_connection(database)
+
+
+    
+    cur = conn.cursor()
+    statement = "UPDATE items SET quantity = quantity+1 WHERE item_name=?"
+    task = (str(upc),)
+    cur.execute(statement, task)
+    conn.commit()
+    conn.close()
+
+    print('Quantity Update on table "Item" Success')
 #TODO - Increment
 #     - Database of 20 products
 #     - 
