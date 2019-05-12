@@ -203,7 +203,9 @@ class window(QtWidgets.QMainWindow):
     def btn_click3(self):
          QtWidgets.QMessageBox.about(self, "","Thankyou for shopping!")
          clear_scan()
+         self.update_budget(0)
          self.restart_program()
+
         #set the sample name variable
     def set_sample_name(self):
         self.sample_name = self.mylineEdit.text()
