@@ -201,10 +201,18 @@ class window(QtWidgets.QMainWindow):
         self.restart_program()
 
     def btn_click3(self):
-         QtWidgets.QMessageBox.about(self, "","Thankyou for shopping!")
-         clear_scan()
-         update_budget(0)
-         self.restart_program()
+        text = 'Items:\n\n'
+        total, items = fetch_items()
+        for item in items:
+            value = str(item[2])
+            item = str(item[0]) + ' - ' + value  +'x'
+            text+=item +'\n'
+        text = text + '\n' + 'Total: ' + str(total)
+
+        QtWidgets.QMessageBox.about(self, "Summary",text)
+        clear_scan()
+        update_budget(0)
+        self.restart_program()
 
         #set the sample name variable
     def set_sample_name(self):
