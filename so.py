@@ -205,7 +205,7 @@ class window(QtWidgets.QMainWindow):
         total, items = fetch_items()
         for item in items:
             value = str(item[2])
-            item = str(item[0]) + ' - ' + value  +'x'
+            item = str(item[0]) + ' PHP' + str(item[1]) + ' - ' + value  +'x'
             text+=item +'\n'
         text = text + '\n' + 'Total: ' + str(total)
 
@@ -266,7 +266,7 @@ class window(QtWidgets.QMainWindow):
                 value = str(item[2])
                 if int(value) == 0:
                     value = ''
-                item = str(item[0]) + ' - ' + value  +'x'
+                item = str(item[0]) + ' PHP' + str(item[1]) + ' - ' + value  +'x'
                 self.b3 = QtWidgets.QPushButton(item)
                 self.b3.setSizePolicy(
                 QtWidgets.QSizePolicy.Preferred,
