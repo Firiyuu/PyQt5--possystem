@@ -1,15 +1,33 @@
 from PyQt5 import QtWidgets,QtCore
+
+import sys
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
 import sys
 import os
 import sip
 from db_connection import clear_scan, search_request, fetch_items, add_request, update_budget, fetch_budget, delete_request, search_request_delete, reduce_quantity_scan, reduce_quantity_item, increase_quantity_item, search_request_delete_item
 
-
+class ScrollMessageBox(QMessageBox):
+   def __init__(self, l, *args, **kwargs):
+      QMessageBox.__init__(self, *args, **kwargs)
+      scroll = QScrollArea(self)
+      scroll.setWidgetResizable(True)
+      self.content = QWidget()
+      scroll.setWidget(self.content)
+      lay = QVBoxLayout(self.content)
+      for item in l:
+         lay.addWidget(QLabel(item, self))
+      self.layout().addWidget(scroll, 0, 0, 1, self.layout().columnCount())
+      self.setStyleSheet("QScrollArea{min-width:300 px; min-height: 400px}")
 
 class window(QtWidgets.QMainWindow):
     def __init__(self):
         super(window,self).__init__()
         centwid=QtWidgets.QWidget()
+        scroll = QtWidgets.QScrollArea()
 
         self.mylineEdit = QtWidgets.QLineEdit()
 
@@ -162,8 +180,9 @@ class window(QtWidgets.QMainWindow):
         centwid.setLayout(lay)
         self.budget.clicked.connect(self.btn_click)
         self.done.clicked.connect(self.btn_click3)
-        
-        self.setCentralWidget(centwid)
+        scroll.setWidget(centwid)
+        scroll.setWidgetResizable(True)
+        self.setCentralWidget(scroll)
 
         self.show()
 
@@ -191,27 +210,38 @@ class window(QtWidgets.QMainWindow):
         item = sender.text()
         item = item.split('-')[0]
         item = item.strip()
-        print(str(item) + '<----')
-        item, quantity = search_request_delete(item)
-        print(str(quantity))
 
-        if int(quantity) == 1:
-           delete_request(item)
-        else:
-           reduce_quantity_scan(item)
-           increase_quantity_item(item)
-        self.restart_program()
+        try:
+            item, quantity = search_request_delete(item)
+            print(str(quantity))
+            if int(quantity) == 1:
+               delete_request(item)
+            else:
+               reduce_quantity_scan(item)
+               increase_quantity_item(item)
+            self.restart_program()
+        except Exception as e:
+            self.restart_program()           
 
     def btn_click3(self):
         text = 'Items:\n\n'
         total, items = fetch_items()
-        for item in items:
-            value = str(item[2])
-            item = str(item[0]) + ' - PHP' + str(item[1]) + ' - ' + value  +'x'
-            text+=item +'\n'
-        text = text + '\n' + 'Total: ' + str(total)
 
-        QtWidgets.QMessageBox.about(self, "Summary",text)
+        self.lst = []
+        self.lst.append(text)
+        for item in items:
+
+            value = str(item[2])
+            item = str(item[0]) + ' - ' + value  +'x'
+            self.lst.append(item)
+            text+=item +'\n'
+            
+        text = '\n\nTotal: ' + str(total)
+        self.lst.append(text)
+
+
+        result = ScrollMessageBox(self.lst, None)
+        result.exec_()
         clear_scan()
         update_budget(0)
         self.restart_program()
@@ -268,7 +298,7 @@ class window(QtWidgets.QMainWindow):
                 value = str(item[2])
                 if int(value) == 0:
                     value = ''
-                item = str(item[0]) + ' - PHP' + str(item[1]) + ' - ' + value  +'x'
+                item = str(item[0]) + ' - ' + value  +'x'
                 self.b3 = QtWidgets.QPushButton(item)
                 self.b3.setSizePolicy(
                 QtWidgets.QSizePolicy.Preferred,
