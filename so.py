@@ -232,7 +232,7 @@ class window(QtWidgets.QMainWindow):
         for item in items:
 
             value = str(item[2])
-            item = str(item[0]) + ' - ' + value  +'x'
+            item = str(item[0]) + ' - ' + str(item[1]) + ' - ' + value  +'x'
             self.lst.append(item)
             text+=item +'\n'
             
@@ -298,7 +298,7 @@ class window(QtWidgets.QMainWindow):
                 value = str(item[2])
                 if int(value) == 0:
                     value = ''
-                item = str(item[0]) + ' - ' + value  +'x'
+                item = str(item[0]) + ' - ' + str(item[1]) + ' - ' + value  +'x'
                 self.b3 = QtWidgets.QPushButton(item)
                 self.b3.setSizePolicy(
                 QtWidgets.QSizePolicy.Preferred,
