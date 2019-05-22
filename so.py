@@ -122,7 +122,7 @@ class window(QtWidgets.QMainWindow):
         self.message2.setFont(f)
 
         self.message3 = QtWidgets.QLabel(centwid)
-        self.message3.setText(" ")
+        self.message3.setText("Budget Remaining: " + str(curr_budget-total).replace('-',''))
 
         self.message4 = QtWidgets.QLabel(centwid)
         self.message4.setText(" ")
@@ -159,8 +159,9 @@ class window(QtWidgets.QMainWindow):
         self.v_box1.addStretch()
         self.v_box1.addWidget(self.message1)
         self.v_box1.addWidget(self.message2)
+        self.v_box1.addWidget(self.message3)   
         self.v_box1.addWidget(self.mylineEdit)
-        self.v_box1.addWidget(self.message3)    
+         
         self.v_box1.addWidget(self.done)
         self.v_box1.addStretch()
         self.v_box1.addStretch()
@@ -322,16 +323,16 @@ class window(QtWidgets.QMainWindow):
             f.setBold(True)
             self.budget_status.setFont(f)
 
-            self.message3.setText(" ")
-
+            self.message3 = QtWidgets.QLabel()
+            self.message3.setText("Budget Remaining: " + str(curr_budget-total).replace('-',''))
 
             if total > (curr_budget*70)/100:
                 if total > curr_budget: 
                     status = "You are over budget!"
                     QtWidgets.QMessageBox.about(self, "Warning!!", "You are over budget!")
                 else:
-                    status = "You are close to over budgeting!"
-                    QtWidgets.QMessageBox.about(self, "Caution!!", "You are close to over budgeting!")
+                    status = "You are close to over budgeting!" 
+                    QtWidgets.QMessageBox.about(self, "Caution!!", "You are close to over budgeting! ")
 
             else:
                 status = "Still in budget!"
